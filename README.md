@@ -54,7 +54,17 @@ pip3 install pygame==2.4.0
 ```
 
 ## How to Play
-Each time you would like to play this game, run the following command:
+There are three developed mini games:
+1. Phase 1: Bloody Mess
+   - Use your left and right arrow keys to avoid symptoms (the yellow circles) and try to collide with the remedies (the white circles).
+3. Phase 2: Hormone Party
+   - Click on the corresponding myth or fact buttons for the statements on the cards. Your score is in the top right corner.
+5. Phase 3: Eggscape
+   - Use your space bar to avoid colliding with the incoming obstacles.
+
+Phase 4 is under development!
+
+Each time you would like to play Cycle Quest, run the following command:
 ```
 $ python3.9 <relative path to main.py>
 ```
