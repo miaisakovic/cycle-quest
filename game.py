@@ -72,7 +72,7 @@ class CycleQuest:
         self.current_symptoms = pygame.sprite.Group()
         self.current_relief = pygame.sprite.Group()
 
-        self.total_game_time = 30000
+        self.total_game_time = 15000
         self.start_time = 0
 
         self.game_font = pygame.font.Font('font/Rubik-Regular.ttf', 40)
@@ -111,7 +111,7 @@ class CycleQuest:
                                 pygame.image.load('graphics/eggscape/stage_3.png')]
         self.current_eggscape_stage = 0
         self.next_stage_button = pygame.image.load('graphics/eggscape/next_stage_button.png')
-        self.next_stage_rect = self.next_stage_button.get_rect(center = (530, 670))
+        self.next_stage_rect = self.next_stage_button.get_rect(center = (510, 660))
         self.egg = pygame.sprite.GroupSingle()
         self.egg.add(Egg())
         self.create_obstacle = pygame.USEREVENT + 3
@@ -266,7 +266,7 @@ class CycleQuest:
                 if self.current_game == 1:
                     self.current_state = 5
                 if self.current_game == 2:
-                    self.current_state = 6
+                    self.current_state = 7
                 self.start_time = int(pygame.time.get_ticks())
 
 
@@ -359,9 +359,10 @@ class CycleQuest:
                 self.current_obstacles.add(TopObstacle(random_int2, random_int1))
                 self.current_obstacles.add(BottomObstacle(random_int2, random_int1))
             
-            if self.num_obstacles_passed == 10 or self.num_obstacles_passed == 15:
-                self.current_state = 7
-                self.current_eggscape_stage += 1
+            if self.num_obstacles_passed == 5:
+                if not self.current_eggscape_stage == 2:
+                    self.current_state = 7
+                    self.current_eggscape_stage += 1
 
             hit_list = pygame.sprite.spritecollide(self.egg.sprite, self.current_obstacles, True)   
             if len(hit_list) > 0:
@@ -373,15 +374,16 @@ class CycleQuest:
                 pygame.quit()
                 exit()
 
-            mouse_pos = pygame.mouse.get_pos()
+            mouse_pos = pygame.mouse.get_pos()    
             
             if event.type == pygame.MOUSEBUTTONDOWN and self.next_stage_rect.collidepoint(mouse_pos):
                 self.current_obstacles.empty()
                 self.current_obstacles = pygame.sprite.Group()
+                self.num_obstacles_passed = 0
+                self.current_state -= 1
     
     def unachieved(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-
