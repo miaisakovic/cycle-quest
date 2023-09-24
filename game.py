@@ -220,7 +220,6 @@ class CycleQuest:
             # Set a maximum frame rate
             self.frame_rate.tick(60)
 
-
     def start_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -237,7 +236,6 @@ class CycleQuest:
                 if self.play_rect.collidepoint(mouse_pos):
                     self.current_state += 1
 
-
     def map_event(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -250,7 +248,6 @@ class CycleQuest:
                 self.current_state = 2
 
                 self.phase += 1
-
 
     def phase_event(self):
         for event in pygame.event.get():
@@ -268,7 +265,6 @@ class CycleQuest:
                 if self.current_game == 2:
                     self.current_state = 7
                 self.start_time = int(pygame.time.get_ticks())
-
 
     def bloody_mess(self):
         for event in pygame.event.get():
@@ -300,7 +296,6 @@ class CycleQuest:
                 self.current_symptoms.empty()
                 self.current_relief.empty()
                 self.current_state += 1
-            
     
     def bloody_mess_timer(self):
         score = self.start_time + self.total_game_time - int(pygame.time.get_ticks())
@@ -321,7 +316,6 @@ class CycleQuest:
             if event.type == pygame.MOUSEBUTTONDOWN and self.popup_rect.collidepoint(mouse_pos):
                 self.current_state = 1
                 self.current_game += 1
-
 
     def hormone_party(self):
         for event in pygame.event.get():
@@ -367,7 +361,7 @@ class CycleQuest:
             hit_list = pygame.sprite.spritecollide(self.egg.sprite, self.current_obstacles, True)   
             if len(hit_list) > 0:
                 self.current_state = 8
-    
+
     def eggscape_stage(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -381,7 +375,7 @@ class CycleQuest:
                 self.current_obstacles = pygame.sprite.Group()
                 self.num_obstacles_passed = 0
                 self.current_state -= 1
-    
+
     def unachieved(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
