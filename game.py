@@ -3,12 +3,12 @@ from random import choice
 from random import randint
 from sys import exit
 
-from blood_drop import BloodDrop
-from symptom import Symptom
-from relief import Relief
-from egg import Egg
-from obstacle_top import TopObstacle
-from obstacle_bottom import BottomObstacle
+from phase_1.blood_drop import BloodDrop
+from phase_1.symptom import Symptom
+from phase_1.relief import Relief
+from phase_3.egg import Egg
+from phase_3.obstacle_top import TopObstacle
+from phase_3.obstacle_bottom import BottomObstacle
 
 class CycleQuest:
     def __init__(self):
@@ -123,108 +123,44 @@ class CycleQuest:
         while True:
             if self.states[self.current_state] == "Start Screen":
                 self.start_event() 
-                self.screen.blit(self.start_screen, (-4,0))
-                self.screen.blit(self.info_img, self.info_rect)
-                self.screen.blit(self.play_button, self.play_rect)
-
-                if self.show_popup == True:
-                    self.screen.blit(self.popup, self.popup_rect)
-                    self.screen.blit(self.continue_button, self.continue_rect)
         
             if self.states[self.current_state] == "Map":
                 self.map_event()
-                self.screen.blit(self.game_maps[self.phase], (0,0))
-
-                if self.phase == 1:
-                    self.start_level_rect = self.start_level_button.get_rect(center = (825, 448))
-                if self.phase == 2:
-                    self.start_level_rect = self.start_level_button.get_rect(center = (287, 270))
-                if self.phase == 3:
-                    pass
-
-                self.screen.blit(self.start_level_button, self.start_level_rect)
             
             if self.states[self.current_state] == "Phase Intro":
-                self.screen.blit(self.game_intro_screen[self.current_game], (-4,0))
                 self.phase_event()
-                self.screen.blit(self.start_game_button, self.start_game_rect)
             
             if self.states[self.current_state] == "Bloody Mess":
                 self.bloody_mess()
-                self.screen.blit(self.bloody_mess_background, (-4,0))
-                if self.lives == 0:
-                    self.screen.blit(self.empty_heart, (702,104))
-                    self.screen.blit(self.empty_heart, (802,104))
-                    self.screen.blit(self.empty_heart, (902,104))
-                elif self.lives == 1:
-                    self.screen.blit(self.filled_heart, (700, 95))
-                    self.screen.blit(self.empty_heart, (802, 104))
-                    self.screen.blit(self.empty_heart, (902, 104))
-                elif self.lives == 2:
-                    self.screen.blit(self.filled_heart, (700, 95))
-                    self.screen.blit(self.filled_heart, (800, 95))
-                    self.screen.blit(self.empty_heart, (902, 104))
-                elif self.lives == 3:
-                    self.screen.blit(self.filled_heart, (700, 95))
-                    self.screen.blit(self.filled_heart, (800, 95))
-                    self.screen.blit(self.filled_heart, (900, 95))
-                self.blood_drop.draw(self.screen)
-                self.blood_drop.update()
-                self.current_symptoms.draw(self.screen)
-                self.current_symptoms.update()
-                self.current_relief.draw(self.screen)
-                self.current_relief.update()
-                self.bloody_mess_timer()
 
             if self.states[self.current_state] == "Badge":
-                self.screen.blit(self.badges[self.current_game], (-4,0))
                 self.badge()
-                self.continue_rect = self.continue_button.get_rect(center = (497,570))
-                self.screen.blit(self.continue_button, self.continue_rect)
             
             if self.states[self.current_state] == "Hormone Party":
-                self.screen.blit(self.cards[self.card_counter], (-4,0))
-
-                if self.card_counter % 2 == 0: 
-                    self.screen.blit(self.fact_button, self.fact_rect)
-                    self.screen.blit(self.myth_button, self.myth_rect)
-                else:
-                    self.continue_rect = self.continue_button.get_rect(center = (497,563))
-                    self.screen.blit(self.continue_button, self.continue_rect)
-
-                score_surface = self.game_font.render(str(self.score)+'/6', False, (255,255,255))
-                score_rectangle = score_surface.get_rect(topright=(945, 30))
-                self.screen.blit(score_surface, score_rectangle)
-
                 self.hormone_party()
 
             if self.states[self.current_state] == "Eggscape":
                  self.eggscape()
-                 self.screen.blit(self.eggscape_background, (0,0))
-                 self.egg.draw(self.screen)
-                 self.egg.update()
-                 self.current_obstacles.draw(self.screen)
-                 self.current_obstacles.update()
             
             if self.states[self.current_state] == "Eggscape Stage":
                 self.eggscape_stage()
-                self.screen.blit(self.eggscape_stages[self.current_eggscape_stage], (-4,0))
-                self.screen.blit(self.next_stage_button, self.next_stage_rect)
             
             if self.states[self.current_state] == "Unachieved":
                 self.unachieved()
-                self.screen.blit(self.unachieved_badge, (-4,0))
 
             pygame.display.update()
 
             # Set a maximum frame rate
             self.frame_rate.tick(60)
+    
+    def quit_game(self, event):
+        if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
     def start_event(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
 
             mouse_pos = pygame.mouse.get_pos()
 
@@ -235,12 +171,18 @@ class CycleQuest:
                     self.show_popup = False
                 if self.play_rect.collidepoint(mouse_pos):
                     self.current_state += 1
+        
+        self.screen.blit(self.start_screen, (-4,0))
+        self.screen.blit(self.info_img, self.info_rect)
+        self.screen.blit(self.play_button, self.play_rect)
+
+        if self.show_popup == True:
+            self.screen.blit(self.popup, self.popup_rect)
+            self.screen.blit(self.continue_button, self.continue_rect)
 
     def map_event(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
 
             mouse_pos = pygame.mouse.get_pos()
 
@@ -248,12 +190,23 @@ class CycleQuest:
                 self.current_state = 2
 
                 self.phase += 1
+        
+        self.screen.blit(self.game_maps[self.phase], (0,0))
+
+        if self.phase == 1:
+            self.start_level_rect = self.start_level_button.get_rect(center = (825, 448))
+        if self.phase == 2:
+            self.start_level_rect = self.start_level_button.get_rect(center = (287, 270))
+        if self.phase == 3:
+            pass
+
+        self.screen.blit(self.start_level_button, self.start_level_rect)
 
     def phase_event(self):
+        self.screen.blit(self.game_intro_screen[self.current_game], (-4,0))
+
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
             
             mouse_pos = pygame.mouse.get_pos()
             
@@ -266,11 +219,11 @@ class CycleQuest:
                     self.current_state = 7
                 self.start_time = int(pygame.time.get_ticks())
 
+        self.screen.blit(self.start_game_button, self.start_game_rect)
+
     def bloody_mess(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
             
             available_symptoms = ["acne", "backache", "bloating", 
                                   "breast_soreness", "cravings", "diarrhea", 
@@ -296,6 +249,33 @@ class CycleQuest:
                 self.current_symptoms.empty()
                 self.current_relief.empty()
                 self.current_state += 1
+        
+        self.screen.blit(self.bloody_mess_background, (-4,0))
+        
+        if self.lives == 0:
+            self.screen.blit(self.empty_heart, (702,104))
+            self.screen.blit(self.empty_heart, (802,104))
+            self.screen.blit(self.empty_heart, (902,104))
+        elif self.lives == 1:
+            self.screen.blit(self.filled_heart, (700, 95))
+            self.screen.blit(self.empty_heart, (802, 104))
+            self.screen.blit(self.empty_heart, (902, 104))
+        elif self.lives == 2:
+            self.screen.blit(self.filled_heart, (700, 95))
+            self.screen.blit(self.filled_heart, (800, 95))
+            self.screen.blit(self.empty_heart, (902, 104))
+        elif self.lives == 3:
+            self.screen.blit(self.filled_heart, (700, 95))
+            self.screen.blit(self.filled_heart, (800, 95))
+            self.screen.blit(self.filled_heart, (900, 95))
+        
+        self.blood_drop.draw(self.screen)
+        self.blood_drop.update()
+        self.current_symptoms.draw(self.screen)
+        self.current_symptoms.update()
+        self.current_relief.draw(self.screen)
+        self.current_relief.update()
+        self.bloody_mess_timer()
     
     def bloody_mess_timer(self):
         score = self.start_time + self.total_game_time - int(pygame.time.get_ticks())
@@ -306,22 +286,36 @@ class CycleQuest:
             self.current_state += 1
 
     def badge(self):
+        self.screen.blit(self.badges[self.current_game], (-4,0))
+        
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
             
             mouse_pos = pygame.mouse.get_pos()
             
             if event.type == pygame.MOUSEBUTTONDOWN and self.popup_rect.collidepoint(mouse_pos):
                 self.current_state = 1
                 self.current_game += 1
+        
+        self.continue_rect = self.continue_button.get_rect(center = (497,570))
+        self.screen.blit(self.continue_button, self.continue_rect)
 
     def hormone_party(self):
+        self.screen.blit(self.cards[self.card_counter], (-4,0))
+
+        if self.card_counter % 2 == 0: 
+            self.screen.blit(self.fact_button, self.fact_rect)
+            self.screen.blit(self.myth_button, self.myth_rect)
+        else:
+            self.continue_rect = self.continue_button.get_rect(center = (497,563))
+            self.screen.blit(self.continue_button, self.continue_rect)
+
+        score_surface = self.game_font.render(str(self.score)+'/6', False, (255,255,255))
+        score_rectangle = score_surface.get_rect(topright=(945, 30))
+        self.screen.blit(score_surface, score_rectangle)
+        
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
             
             mouse_pos = pygame.mouse.get_pos()
             
@@ -342,9 +336,7 @@ class CycleQuest:
 
     def eggscape(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
 
             if event.type == self.create_obstacle:
                 self.num_obstacles_passed += 1
@@ -362,22 +354,29 @@ class CycleQuest:
             if len(hit_list) > 0:
                 self.current_state = 8
 
+        self.screen.blit(self.eggscape_background, (0,0))
+        self.egg.draw(self.screen)
+        self.egg.update()
+        self.current_obstacles.draw(self.screen)
+        self.current_obstacles.update()
+
     def eggscape_stage(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
 
             mouse_pos = pygame.mouse.get_pos()    
-            
+
             if event.type == pygame.MOUSEBUTTONDOWN and self.next_stage_rect.collidepoint(mouse_pos):
                 self.current_obstacles.empty()
                 self.current_obstacles = pygame.sprite.Group()
                 self.num_obstacles_passed = 0
                 self.current_state -= 1
 
+        self.screen.blit(self.eggscape_stages[self.current_eggscape_stage], (-4,0))
+        self.screen.blit(self.next_stage_button, self.next_stage_rect)
+
     def unachieved(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+            self.quit_game(event)
+
+        self.screen.blit(self.unachieved_badge, (-4,0))

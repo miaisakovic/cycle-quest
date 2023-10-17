@@ -1,5 +1,5 @@
 # Cycle Quest
-Cycle Quest is a game that promotes menstrual education for young teens. It won first place as the best overall project at TechNova 2023!
+Cycle Quest is a game that provides teens with informative and engaging content on the menstrual cycle, making learning both fun and captivating! It won first place as the best overall project at TechNova.
 
 For more information, visit: https://devpost.com/software/cycle-quest
 
