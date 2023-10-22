@@ -1,6 +1,5 @@
 import pygame
-from random import choice
-from random import randint
+from random import choice, randint
 from sys import exit
 
 from phase_1.blood_drop import BloodDrop
@@ -15,17 +14,17 @@ class CycleQuest:
         pygame.init()
         pygame.display.set_caption('Cycle Quest')
         self.screen = pygame.display.set_mode((1024, 768))
+        self.frame_rate = pygame.time.Clock()
+        self.game_font = pygame.font.Font('font/Rubik-ExtraBold.ttf', 40)
 
         self.states = ["Start Screen", "Map", "Phase Intro", "Bloody Mess",
-                       "Badge", "Hormone Party", "Eggscape", "Eggscape Stage",
-                       "Unachieved"]
+                       "Hormone Party", "Eggscape", "Eggscape Stage",
+                       "Badge", "Unachieved Badge"]
         self.current_state = 0
-
-        self.frame_rate = pygame.time.Clock()
+        self.phase = 0
 
         # Start Screen Graphics
         self.start_screen = pygame.image.load('graphics/start-screen/start_screen.png')
-        self.phase = 0
 
         self.play_button = pygame.image.load('graphics/start-screen/play_button.png')
         self.play_rect = self.play_button.get_rect(center = (468, 690))
@@ -48,11 +47,10 @@ class CycleQuest:
         self.start_level_button = pygame.image.load('graphics/maps/start_level_button.png')
         self.start_level_rect = self.start_level_button.get_rect(center = (330, 567))
 
-        # Loading Screens
+        # Phase Intro Screens
         self.game_intro_screen = [pygame.image.load('graphics/bloody-mess/bloody_mess_intro_screen.png'), 
                                   pygame.image.load('graphics/hormone-party/hormone_party_intro_screen.png'), 
                                   pygame.image.load('graphics/eggscape/eggscape_intro_screen.png')]
-        self.current_game = 0
         self.start_game_button = pygame.image.load('graphics/start-screen/start_game_button.png')
         self.start_game_rect = self.start_game_button.get_rect(center = (512, 663))
 
@@ -75,14 +73,6 @@ class CycleQuest:
         self.total_game_time = 15000
         self.start_time = 0
 
-        self.game_font = pygame.font.Font('font/Rubik-Regular.ttf', 40)
-
-        # Badge Graphics
-        self.badges = [pygame.image.load('graphics/badges/phase_1_badge.png'),
-                       pygame.image.load('graphics/badges/phase_2_badge.png')]
-        
-        self.unachieved_badge = pygame.image.load('graphics/badges/phase_3_unachieved_badge.png')
-
         # Hormone Party Game Elements
         self.card_counter = 0
         self.cards = [pygame.image.load('graphics/hormone-party/myth_or_fact_round_1.png'),
@@ -96,8 +86,7 @@ class CycleQuest:
                       pygame.image.load('graphics/hormone-party/myth_or_fact_round_5.png'),
                       pygame.image.load('graphics/hormone-party/myth_or_fact_answer_5.png'),
                       pygame.image.load('graphics/hormone-party/myth_or_fact_round_6.png'),
-                      pygame.image.load('graphics/hormone-party/myth_or_fact_answer_6.png')
-                      ]
+                      pygame.image.load('graphics/hormone-party/myth_or_fact_answer_6.png')]
         self.fact_button = pygame.image.load('graphics/hormone-party/fact_button.png')
         self.fact_rect = self.fact_button.get_rect(center = (623, 572))
         self.myth_button = pygame.image.load('graphics/hormone-party/myth_button.png')
@@ -118,41 +107,47 @@ class CycleQuest:
         pygame.time.set_timer(self.create_obstacle, 3500)
         self.current_obstacles = pygame.sprite.Group()
         self.num_obstacles_passed = 0
-    
+
+        # Badge Graphics
+        self.badges = [pygame.image.load('graphics/badges/phase_1_badge.png'),
+                       pygame.image.load('graphics/badges/phase_2_badge.png')]
+        
+        self.unachieved_badge_eggscape = pygame.image.load('graphics/badges/phase_3_unachieved_badge.png')
+
     def run_game(self):
         while True:
             if self.states[self.current_state] == "Start Screen":
                 self.start_event() 
-        
+
             if self.states[self.current_state] == "Map":
                 self.map_event()
-            
+
             if self.states[self.current_state] == "Phase Intro":
-                self.phase_event()
-            
+                self.phase_intro()
+
             if self.states[self.current_state] == "Bloody Mess":
                 self.bloody_mess()
 
-            if self.states[self.current_state] == "Badge":
-                self.badge()
-            
             if self.states[self.current_state] == "Hormone Party":
                 self.hormone_party()
 
             if self.states[self.current_state] == "Eggscape":
                  self.eggscape()
-            
+
             if self.states[self.current_state] == "Eggscape Stage":
                 self.eggscape_stage()
-            
-            if self.states[self.current_state] == "Unachieved":
-                self.unachieved()
+
+            if self.states[self.current_state] == "Badge":
+                self.badge()
+
+            if self.states[self.current_state] == "Unachieved Badge":
+                self.unachieved_badge()
 
             pygame.display.update()
 
             # Set a maximum frame rate
             self.frame_rate.tick(60)
-    
+
     def quit_game(self, event):
         if event.type == pygame.QUIT:
                 pygame.quit()
@@ -171,7 +166,7 @@ class CycleQuest:
                     self.show_popup = False
                 if self.play_rect.collidepoint(mouse_pos):
                     self.current_state += 1
-        
+
         self.screen.blit(self.start_screen, (-4,0))
         self.screen.blit(self.info_img, self.info_rect)
         self.screen.blit(self.play_button, self.play_rect)
@@ -189,8 +184,6 @@ class CycleQuest:
             if event.type == pygame.MOUSEBUTTONDOWN and self.start_level_rect.collidepoint(mouse_pos):
                 self.current_state = 2
 
-                self.phase += 1
-        
         self.screen.blit(self.game_maps[self.phase], (0,0))
 
         if self.phase == 1:
@@ -202,21 +195,21 @@ class CycleQuest:
 
         self.screen.blit(self.start_level_button, self.start_level_rect)
 
-    def phase_event(self):
-        self.screen.blit(self.game_intro_screen[self.current_game], (-4,0))
+    def phase_intro(self):
+        self.screen.blit(self.game_intro_screen[self.phase], (-4,0))
 
         for event in pygame.event.get():
             self.quit_game(event)
-            
+
             mouse_pos = pygame.mouse.get_pos()
-            
+
             if event.type == pygame.MOUSEBUTTONDOWN and self.start_game_rect.collidepoint(mouse_pos):
-                if self.current_game == 0:
+                if self.phase == 0:
                     self.current_state = 3
-                if self.current_game == 1:
-                    self.current_state = 5
-                if self.current_game == 2:
-                    self.current_state = 7
+                if self.phase == 1:
+                    self.current_state = 4
+                if self.phase == 2:
+                    self.current_state = 6
                 self.start_time = int(pygame.time.get_ticks())
 
         self.screen.blit(self.start_game_button, self.start_game_rect)
@@ -224,11 +217,11 @@ class CycleQuest:
     def bloody_mess(self):
         for event in pygame.event.get():
             self.quit_game(event)
-            
+
             available_symptoms = ["acne", "backache", "bloating", 
                                   "breast_soreness", "cravings", "diarrhea", 
                                   "fatigue", "mood_swings"]
-            
+
             available_relief = ["heat_pack", "herbal_tea", "painkiller", 
                                 "supplements"]
 
@@ -236,22 +229,24 @@ class CycleQuest:
                 self.current_symptoms.add(Symptom(choice(available_symptoms)))   
             if event.type == self.create_relief:
                 self.current_relief.add(Relief(choice(available_relief)))
-        
+
             hit_list = pygame.sprite.spritecollide(self.blood_drop.sprite, self.current_symptoms, True)   
-            for i in hit_list:
-                self.lives -= 1
+            self.lives -= len(hit_list)
+            if self.lives < 0:
+                self.lives = 0
+
             hit_list = pygame.sprite.spritecollide(self.blood_drop.sprite, self.current_relief, True)   
-            for i in hit_list:
-                if self.lives < 3:
-                    self.lives += 1
+            self.lives += len(hit_list)
+            if self.lives > 3:
+                self.lives = 3
 
             if self.lives == 0:
                 self.current_symptoms.empty()
                 self.current_relief.empty()
-                self.current_state += 1
-        
+                self.current_state = 7
+
         self.screen.blit(self.bloody_mess_background, (-4,0))
-        
+
         if self.lives == 0:
             self.screen.blit(self.empty_heart, (702,104))
             self.screen.blit(self.empty_heart, (802,104))
@@ -268,37 +263,22 @@ class CycleQuest:
             self.screen.blit(self.filled_heart, (700, 95))
             self.screen.blit(self.filled_heart, (800, 95))
             self.screen.blit(self.filled_heart, (900, 95))
-        
+
+        self.bloody_mess_timer()
         self.blood_drop.draw(self.screen)
         self.blood_drop.update()
         self.current_symptoms.draw(self.screen)
         self.current_symptoms.update()
         self.current_relief.draw(self.screen)
         self.current_relief.update()
-        self.bloody_mess_timer()
-    
+
     def bloody_mess_timer(self):
         score = self.start_time + self.total_game_time - int(pygame.time.get_ticks())
         score_surface = self.game_font.render(str(int(score/1000)), False, (255,255,255))
         score_rectangle = score_surface.get_rect(topright=(945, 30))
         self.screen.blit(score_surface, score_rectangle)
         if score <= 0:
-            self.current_state += 1
-
-    def badge(self):
-        self.screen.blit(self.badges[self.current_game], (-4,0))
-        
-        for event in pygame.event.get():
-            self.quit_game(event)
-            
-            mouse_pos = pygame.mouse.get_pos()
-            
-            if event.type == pygame.MOUSEBUTTONDOWN and self.popup_rect.collidepoint(mouse_pos):
-                self.current_state = 1
-                self.current_game += 1
-        
-        self.continue_rect = self.continue_button.get_rect(center = (497,570))
-        self.screen.blit(self.continue_button, self.continue_rect)
+            self.current_state = 7
 
     def hormone_party(self):
         self.screen.blit(self.cards[self.card_counter], (-4,0))
@@ -313,12 +293,12 @@ class CycleQuest:
         score_surface = self.game_font.render(str(self.score)+'/6', False, (255,255,255))
         score_rectangle = score_surface.get_rect(topright=(945, 30))
         self.screen.blit(score_surface, score_rectangle)
-        
+
         for event in pygame.event.get():
             self.quit_game(event)
-            
+
             mouse_pos = pygame.mouse.get_pos()
-            
+
             if self.card_counter % 2 == 0:
                 if event.type == pygame.MOUSEBUTTONDOWN and self.fact_rect.collidepoint(mouse_pos):
                     if self.card_counter == 4 or self.card_counter == 8 or self.card_counter == 10:
@@ -332,7 +312,7 @@ class CycleQuest:
                 if event.type == pygame.MOUSEBUTTONDOWN and self.continue_rect.collidepoint(mouse_pos):
                     self.card_counter += 1
                     if self.card_counter == 12:
-                        self.current_state = 4
+                        self.current_state = 7
 
     def eggscape(self):
         for event in pygame.event.get():
@@ -344,10 +324,10 @@ class CycleQuest:
                 random_int2 = randint(1,4)
                 self.current_obstacles.add(TopObstacle(random_int2, random_int1))
                 self.current_obstacles.add(BottomObstacle(random_int2, random_int1))
-            
+
             if self.num_obstacles_passed == 5:
                 if not self.current_eggscape_stage == 2:
-                    self.current_state = 7
+                    self.current_state = 6
                     self.current_eggscape_stage += 1
 
             hit_list = pygame.sprite.spritecollide(self.egg.sprite, self.current_obstacles, True)   
@@ -375,8 +355,23 @@ class CycleQuest:
         self.screen.blit(self.eggscape_stages[self.current_eggscape_stage], (-4,0))
         self.screen.blit(self.next_stage_button, self.next_stage_rect)
 
-    def unachieved(self):
+    def badge(self):
+        self.screen.blit(self.badges[self.phase], (-4,0))
+
         for event in pygame.event.get():
             self.quit_game(event)
 
-        self.screen.blit(self.unachieved_badge, (-4,0))
+            mouse_pos = pygame.mouse.get_pos()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and self.popup_rect.collidepoint(mouse_pos):
+                self.current_state = 1
+                self.phase += 1
+
+        self.continue_rect = self.continue_button.get_rect(center = (497,570))
+        self.screen.blit(self.continue_button, self.continue_rect)
+
+    def unachieved_badge(self):
+        for event in pygame.event.get():
+            self.quit_game(event)
+
+        self.screen.blit(self.unachieved_badge_eggscape, (-4,0))
