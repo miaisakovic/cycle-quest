@@ -101,6 +101,8 @@ class CycleQuest:
         self.current_eggscape_stage = 0
         self.next_stage_button = pygame.image.load('graphics/eggscape/next_stage_button.png')
         self.next_stage_rect = self.next_stage_button.get_rect(center = (510, 660))
+        self.play_again_button = pygame.image.load('graphics/eggscape/play_again_button.png')
+        self.play_again_rect = self.play_again_button.get_rect(center = (498, 570))
         self.egg = pygame.sprite.GroupSingle()
         self.egg.add(Egg())
         self.create_obstacle = pygame.USEREVENT + 3
@@ -363,7 +365,7 @@ class CycleQuest:
 
             mouse_pos = pygame.mouse.get_pos()
 
-            if event.type == pygame.MOUSEBUTTONDOWN and self.popup_rect.collidepoint(mouse_pos):
+            if event.type == pygame.MOUSEBUTTONDOWN and self.continue_rect.collidepoint(mouse_pos):
                 self.current_state = 1
                 self.phase += 1
 
@@ -374,4 +376,14 @@ class CycleQuest:
         for event in pygame.event.get():
             self.quit_game(event)
 
+            mouse_pos = pygame.mouse.get_pos()
+
+            if event.type == pygame.MOUSEBUTTONDOWN and self.play_again_rect.collidepoint(mouse_pos):
+                self.current_obstacles.empty()
+                self.current_obstacles = pygame.sprite.Group()
+                self.num_obstacles_passed = 0
+                self.current_eggscape_stage = 0
+                self.current_state = 2
+
         self.screen.blit(self.unachieved_badge_eggscape, (-4,0))
+        self.screen.blit(self.play_again_button, self.play_again_rect)
