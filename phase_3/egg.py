@@ -3,6 +3,7 @@ import pygame
 class Egg(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+
         self.egg = pygame.image.load('graphics/eggscape/egg.png')
         self.image = pygame.transform.scale_by(self.egg, 0.75)
         self.rect = self.image.get_rect(midbottom=(225, 400))
